@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2013.1 (Build 446U)" ts="2013-11-18 23:50:18">
+<Class name="Common.SQL.Converter">
+<Final>1</Final>
+<Abstract>1</Abstract>
+<SqlTableName>CommonSQL</SqlTableName>
+<TimeChanged>63144,85499.385059</TimeChanged>
+<TimeCreated>63144,77763.147577</TimeCreated>
+
+<Method name="CompositeIdList">
+<Description><![CDATA[
+Преобразует объектный список с памяти в список идентификаторов
+<idList> - список распределенных идентификаторов $ListBuild($ListBuild(id1_part1,...,id1_parntM),...,$ListBuild(idN_part1,...,idN_parntM)
+<result> - список составных идентификаторов $ListBuild(id1,...,idN)
+[action] - конкатенация распреленного идентификатора в составной id1 = $ListGet(id1,1)_"||"_..._$ListGet(id1,M)
+[author] - Лелеко Никита 18/11/13]]></Description>
+<Final>1</Final>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>idList:%List,maxCount:%Integer={$Case($ListValid(idList),1:$ListLength(idList),:-1)}</FormalSpec>
+<NoContext>1</NoContext>
+<ReturnType>%List</ReturnType>
+<SqlName>CompositeIdList</SqlName>
+<SqlProc>1</SqlProc>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	Quit:(maxCount < 0) idList
+	Quit:(maxCount = 0) ""
+	
+	For i = 1:1:maxCount {
+		Set $List(compositeIdList,i) = ..CompositeID($ListGet(idList,i))
+	}
+	Quit compositeIdList
+]]></Implementation>
+</Method>
+
+<Method name="CompositeID">
+<Description><![CDATA[
+Собирает составной Id из $ListBuild(part1,...,partM)
+<id> - распределенный идентификатор вида $ListBuild(part1,...,partM)
+<result> - id = part1_"||"_..._partM
+[action] - конкатенация распределенного идентификаторв с составной
+[author] - Лелеко Никита 18/11/13]]></Description>
+<Final>1</Final>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%List,keyLen:%Integer={$Case($ListValid(id),1:$ListLength(id),:-1)}</FormalSpec>
+<NoContext>1</NoContext>
+<ReturnType>%CacheString</ReturnType>
+<SqlName>CompositeID</SqlName>
+<SqlProc>1</SqlProc>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	Quit:(keyLen < 0) id 
+	Quit:(keyLen = 0) ""
+	Quit:(keyLen = 1) ..CompositeID($ListGet(id))
+	Quit:(keyLen = 2) ..CompositeID($ListGet(id))_"||"_..CompositeID($ListGet(id,2))
+	Quit:(keyLen = 3) ..CompositeID($ListGet(id))_"||"_..CompositeID($ListGet(id,2))_"||"_..CompositeID($ListGet(id,3))
+	
+	#Dim compositeId As %CacheString = ..CompositeID($ListGet(id))
+	For i = 2:1:keyLen {
+		Set compositeId = compositeId_"||"_..CompositeID($ListGet(id,i))
+	}
+	Quit compositeId
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Project name="CommonSQL" LastModified="2013-11-18 23:49:45.104583">
+  <Items>
+    <ProjectItem name="Common.SQL.Converter" type="CLS"></ProjectItem>
+  </Items>
+</Project>
+</Export>
